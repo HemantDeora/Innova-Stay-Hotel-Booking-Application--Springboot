@@ -19,6 +19,7 @@ public class RoomAdminController {
     public ResponseEntity<RoomDto> createNewRoom(@PathVariable Long hotelId,
                                                  @RequestBody RoomDto RoomDto){
         RoomDto room = roomService.createNewRoom(hotelId,RoomDto);
+
         return new ResponseEntity<>(room, HttpStatus.CREATED);
     }
 
