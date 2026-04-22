@@ -46,6 +46,9 @@ public class Inventory {
     @Column(nullable = false)
     private Integer totalCount;
 
+    @Column(nullable = false, columnDefinition = "INTEGER DEFAULT 0")
+    private Integer reserveCount;
+
     @Column(nullable = false, precision = 5, scale = 2)
     private BigInteger surgeFactor;
 
