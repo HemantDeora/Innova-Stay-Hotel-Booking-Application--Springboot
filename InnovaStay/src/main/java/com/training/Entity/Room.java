@@ -7,6 +7,7 @@ import lombok.NoArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
+import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -29,7 +30,7 @@ public class Room {
     private String type;
 
     @Column(nullable = false,precision=10,scale=2)
-    private BigInteger price;
+    private BigDecimal basePrice;
 
     @ElementCollection
     @CollectionTable(

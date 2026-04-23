@@ -12,7 +12,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
-import java.math.BigInteger;
+
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
@@ -47,10 +48,11 @@ public class InventoryServiceImpl implements InventoryService {
                     .hotel(room.getHotel())
                     .room(room)
                     .bookedCount(0)
+                    .reserveCount(0)
                     .city(room.getHotel().getCity())
                     .date(currentDate)
-                    .price(room.getPrice())
-                    .surgeFactor(BigInteger.ONE)
+                    .price(room.getBasePrice())
+                    .surgeFactor(BigDecimal.ONE)
                     .totalCount(room.getTotalCount())
                     .closed(false)
                     .build();
@@ -95,6 +97,6 @@ public class InventoryServiceImpl implements InventoryService {
 
 //        mapping
         return hotelPage.map((element)-> modelMapper.map(element, HotelDto.class));
-    }
 
+    }
 }

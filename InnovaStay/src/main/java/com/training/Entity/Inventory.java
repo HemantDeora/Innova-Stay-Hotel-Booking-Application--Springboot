@@ -8,6 +8,7 @@ import lombok.NoArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
+import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -50,10 +51,10 @@ public class Inventory {
     private Integer reserveCount;
 
     @Column(nullable = false, precision = 5, scale = 2)
-    private BigInteger surgeFactor;
+    private BigDecimal surgeFactor;
 
     @Column(nullable = false, precision = 10, scale = 2)
-    private BigInteger price;
+    private BigDecimal price;
 
     @Column(nullable = false)
     private String city;
