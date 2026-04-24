@@ -3,14 +3,10 @@ package com.training.service.Impl;
 import com.training.Dto.BookingDto;
 import com.training.Dto.BookingRequest;
 import com.training.Dto.GuestDto;
-import com.training.Entity.Hotel;
-import com.training.Entity.Inventory;
-import com.training.Entity.Room;
+import com.training.Entity.*;
+import com.training.Entity.enums.BookingStatus;
 import com.training.Exception.ResourceNotFoundException;
-import com.training.Repository.GuestRepository;
-import com.training.Repository.HotelRepository;
-import com.training.Repository.InventoryRepository;
-import com.training.Repository.RoomRepository;
+import com.training.Repository.*;
 import com.training.service.BookingService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -18,6 +14,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
 
@@ -25,6 +23,7 @@ import java.util.List;
 @RequiredArgsConstructor
 @Service
 public class BookServiceImpl implements BookingService{
+    private final BookingRepository bookingRepository;
 
     private final ModelMapper modelMapper;
     private final GuestRepository guestRepository;
@@ -65,11 +64,107 @@ public class BookServiceImpl implements BookingService{
         inventoryRepository.saveAll(inventoryList);
 
 //        Booking -> reserve krna
-        return null;
+        Booking booking = Booking.builder()
+                .bookingStatus(BookingStatus.RESERVED)
+                .hotel(hotel)
+                .room(room)
+                .checkInDate(bookingRequest.getCheckInDate())
+                .checkOutDate(bookingRequest.getCheckOutDate())
+                .user(getCurrentUser())
+                .roomCount(bookingRequest.getRoomsCount())
+                .build();
+        // Calculate actual amount
+        booking.setAmount(
+                calculateBookingAmount(booking)
+        );
+
+        log.info("Calculated booking amount: {}", booking.getAmount());
+
+        booking = bookingRepository.save(booking);
+        return modelMapper.map(booking, BookingDto.class);
     }
 
     @Override
-    public BookingDto addGuest(Long bookindId, List<GuestDto> guestDTOList) {
-        return null;
+    @Transactional
+    public BookingDto addGuest(Long bookingId, List<GuestDto> guestDTOList) {
+        Booking booking = bookingRepository.findById(bookingId)
+                .orElseThrow(() ->
+                        new ResourceNotFoundException(
+                                "Booking not found with id: " + bookingId));
+
+        if (hasBookingExpired(booking)) {
+            throw new IllegalStateException("Booking has already expired");
+        }
+
+        if (booking.getBookingStatus() != BookingStatus.RESERVED) {
+            throw new IllegalStateException(
+                    "Booking is not under reserved state");
+        }
+
+        for (GuestDto guestDto : guestDTOList) {
+
+            Guest guest = modelMapper.map(guestDto, Guest.class);
+
+            guest.setUser(getCurrentUser());
+
+            guestRepository.save(guest);
+
+            booking.getGuests().add(guest);
+        }
+
+        booking.setBookingStatus(BookingStatus.GUESTS_ADDED);
+
+        bookingRepository.save(booking);
+
+        return modelMapper.map(booking, BookingDto.class);
+
     }
+
+
+
+    public boolean hasBookingExpired(Booking booking){
+        return booking.getCreatedAt().plusMinutes(10).isBefore((LocalDateTime.now()));
+    }
+
+
+
+
+
+
+    public User getCurrentUser(){
+        User user = new User();
+
+//        TODO remove dummy user in future
+        user.setId(1L);
+        return user;
+    }
+
+    private BigDecimal calculateBookingAmount(Booking booking) {
+
+        BigDecimal pricePerNight =
+                booking.getRoom().getBasePrice();
+
+        long days = ChronoUnit.DAYS.between(
+                booking.getCheckInDate(),
+                booking.getCheckOutDate()
+        ) + 1;
+
+        if (days <= 0) {
+            throw new IllegalArgumentException(
+                    "Check-out date must be after check-in date");
+        }
+
+        BigDecimal totalAmount =
+                pricePerNight
+                        .multiply(BigDecimal.valueOf(days))
+                        .multiply(BigDecimal.valueOf(
+                                booking.getRoomCount()
+                        ));
+
+
+
+        return totalAmount;
+    }
+
+
 }

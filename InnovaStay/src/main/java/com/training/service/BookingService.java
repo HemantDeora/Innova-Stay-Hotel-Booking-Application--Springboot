@@ -10,5 +10,5 @@ public interface BookingService {
     //    intializeBooking
     BookingDto intializeBooking (BookingRequest bookingRequest);
     //    Kitne guest ->
-    BookingDto addGuest(Long bookindId , List<GuestDto> guestDTOList);
+    BookingDto addGuest(Long bookingId , List<GuestDto> guestDTOList);
 }
