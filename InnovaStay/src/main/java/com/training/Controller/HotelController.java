@@ -52,4 +52,12 @@ public class HotelController {
         return  ResponseEntity.noContent().build();
 
     }
+
+    @GetMapping
+    public ResponseEntity<List<HotelDto>> getAllHotels() {
+
+        List<HotelDto> hotels = hotelService.getAllHotels();
+
+        return ResponseEntity.ok(hotels);
+    }
 }
