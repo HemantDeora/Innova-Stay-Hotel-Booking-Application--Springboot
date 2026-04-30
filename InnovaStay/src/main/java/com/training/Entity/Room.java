@@ -1,9 +1,8 @@
 package com.training.Entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
@@ -13,9 +12,8 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 @Entity
-@Data
-@AllArgsConstructor
-@NoArgsConstructor
+@Getter
+@Setter
 public class Room {
 
     @Id
@@ -24,26 +22,24 @@ public class Room {
 
     @ManyToOne
     @JoinColumn(name = "hotel_id", nullable = false)
+    @JsonIgnore
     private Hotel hotel;
 
     @Column(nullable = false)
     private String type;
 
-    @Column(nullable = false,precision=10,scale=2)
+    @Column(nullable = false, precision = 10, scale = 2)
     private BigDecimal basePrice;
 
+    // Photos table
     @ElementCollection
-    @CollectionTable(
-            name = "room_photos", joinColumns = @JoinColumn(name = "room_id")
-    )
+    @CollectionTable(name = "room_photos", joinColumns = @JoinColumn(name = "room_id"))
     @Column(name = "photo_url")
     private List<String> photos;
 
+    // Amenities table
     @ElementCollection
-    @CollectionTable(
-            name = "room_amenities",
-            joinColumns = @JoinColumn(name = "room_id")
-    )
+    @CollectionTable(name = "room_amenities", joinColumns = @JoinColumn(name = "room_id"))
     @Column(name = "amenity")
     private List<String> amenities;
 
@@ -53,7 +49,15 @@ public class Room {
     @Column(nullable = false)
     private Integer capacity;
 
+    @OneToMany(
+            mappedBy = "room",
+            cascade = CascadeType.ALL,
+            orphanRemoval = true
+    )
+    private List<Inventory> inventories;
+
     @CreationTimestamp
+    @Column(updatable = false)
     private LocalDateTime createdAt;
 
     @UpdateTimestamp
