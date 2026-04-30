@@ -1,9 +1,11 @@
 package com.training.strategy;
 
 import com.training.Entity.Inventory;
+import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 
+@Service
 public class PricingService {
 
 

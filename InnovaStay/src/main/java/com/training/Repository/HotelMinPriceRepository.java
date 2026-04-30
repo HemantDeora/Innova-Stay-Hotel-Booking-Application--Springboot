@@ -15,7 +15,7 @@ public interface HotelMinPriceRepository extends JpaRepository<HotelMinPrice, Lo
 
 
     @Query("""
-        SELECT new com.logic.DTO.HotelPriceDTO(i.hotel, AVG(i.price))
+        SELECT new com.training.Dto.HotelPriceDTO(i.hotel, AVG(i.price))
             from HotelMinPrice i
                 where i.hotel.city = :city
                     AND i.date between :startDate AND :endDate

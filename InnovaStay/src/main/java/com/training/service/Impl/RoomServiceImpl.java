@@ -8,6 +8,7 @@ import com.training.Entity.Room;
 import com.training.Exception.ResourceNotFoundException;
 import com.training.service.InventoryService;
 import com.training.service.RoomService;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
@@ -59,14 +60,20 @@ public class RoomServiceImpl implements RoomService {
         return modelMapper.map(room, RoomDto.class);
     }
 
+    @Transactional
     @Override
     public void deleteRoomById(Long roomId) {
 
-        log.info("Deleting the room by ID : {}", roomId);
-        Room room = roomRepo.findById(roomId)
-                .orElseThrow(() -> new ResourceNotFoundException("Room not found with ID :" + roomId));
-        inventoryService.deleteFutureInventories(room);
+        log.info("Deleting the room with ID: {}", roomId);
+
+        Room room = roomRepo
+                .findById(roomId)
+                .orElseThrow(() ->
+                        new ResourceNotFoundException(
+                                "Room not found with ID: " + roomId));
 
         roomRepo.delete(room);
+
+        log.info("Room deleted successfully: {}", roomId);
     }
 }
