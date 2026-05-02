@@ -1,6 +1,6 @@
-package com.training.Dto;
+package com.logic.DTO;
 
-import com.training.Entity.enums.BookingStatus;
+import com.logic.entity.enums.BookingStatus;
 import lombok.Data;
 
 import java.math.BigDecimal;
@@ -9,7 +9,7 @@ import java.time.LocalDateTime;
 import java.util.Set;
 
 @Data
-public class BookingDto {
+public class BookingDTO {
     private Long id;
     private Integer roomsCount;
     private LocalDate checkInDate;
@@ -17,6 +17,6 @@ public class BookingDto {
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
     private BookingStatus bookingStatus;
-    private Set<GuestDto> guests;
+    private Set<GuestDTO> guests;
     private BigDecimal amount;
 }
