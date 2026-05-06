@@ -1,8 +1,0 @@
-package com.training.Entity.enums;
-
-public enum BookingStatus {
-    RESERVED,
-    CONFIRMED,
-    CANCELLED,
-    GUESTS_ADDED
-}
