@@ -1,6 +1,5 @@
 package com.logic.security;
 
-
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -15,9 +14,9 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.access.AccessDeniedHandler;
-import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.servlet.HandlerExceptionResolver;
 
@@ -38,44 +37,77 @@ public class WebSecurityConfig {
 
         httpSecurity
                 .cors(Customizer.withDefaults())
-                .csrf(csrfConfig -> csrfConfig.disable())
-                .sessionManagement(sessionConfig -> sessionConfig.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
+
+                .csrf(csrf -> csrf.disable())
+
+                .sessionManagement(session ->
+                        session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+                )
+
                 .authorizeHttpRequests(auth -> auth
+
+                        // Public APIs
+                        .requestMatchers("/auth/**").permitAll()
+
+                        // Protected APIs
                         .requestMatchers("/admin/**").hasRole("HOTEL_MANAGER")
                         .requestMatchers("/bookings/**").authenticated()
                         .requestMatchers("/users/**").authenticated()
+
+                        // Everything else
                         .anyRequest().permitAll()
                 )
-                .exceptionHandling(exHandlingConfig -> exHandlingConfig.accessDeniedHandler(accessDeniedHandler()));
+
+                .exceptionHandling(ex -> ex
+                        .accessDeniedHandler(accessDeniedHandler())
+                        .authenticationEntryPoint(authenticationEntryPoint())
+                )
+
+                .addFilterBefore(
+                        jwtAuthFilter,
+                        UsernamePasswordAuthenticationFilter.class
+                );
 
         return httpSecurity.build();
     }
 
-
-
     @Bean
     public AccessDeniedHandler accessDeniedHandler() {
+
         return (request, response, accessDeniedException) ->
-                handlerExceptionResolver.resolveException(request, response, null, accessDeniedException);
+
+                handlerExceptionResolver.resolveException(
+                        request,
+                        response,
+                        null,
+                        accessDeniedException
+                );
     }
 
     @Bean
     public AuthenticationEntryPoint authenticationEntryPoint() {
+
         return (request, response, authException) ->
-                handlerExceptionResolver.resolveException(request, response, null, authException);
+
+                handlerExceptionResolver.resolveException(
+                        request,
+                        response,
+                        null,
+                        authException
+                );
     }
 
     @Bean
     public PasswordEncoder passwordEncoder() {
+
         return new BCryptPasswordEncoder();
     }
 
     @Bean
-    AuthenticationManager authenticationManager(AuthenticationConfiguration configuration) throws Exception {
+    public AuthenticationManager authenticationManager(
+            AuthenticationConfiguration configuration
+    ) throws Exception {
+
         return configuration.getAuthenticationManager();
     }
-
-
-
 }

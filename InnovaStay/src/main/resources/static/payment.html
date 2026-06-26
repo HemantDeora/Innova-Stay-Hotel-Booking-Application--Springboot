@@ -121,8 +121,8 @@
 
   function unwrapApiResponse(payload) {
     return payload && Object.prototype.hasOwnProperty.call(payload, "data")
-      ? payload.data
-      : payload;
+            ? payload.data
+            : payload;
   }
 
   async function readJsonResponse(response) {
